@@ -1,0 +1,26 @@
+name: "Sparse Checkout"
+description: ""
+
+inputs:
+  patterns:
+    description: The pattern for the sparse checkout.
+    default: "*"
+    required: true
+  branch:
+    description: The branch to checkout.
+    default: ${GITHUB_REF/#refs\/heads\//}
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: "Sparse Checkout"
+      shell: bash
+      run: |
+        REPO="https://${GITHUB_ACTOR}:${{ github.token }}@github.com/${GITHUB_REPOSITORY}.git"
+        BRANCH="${{ inputs.branch }}"
+        git clone --filter=blob:none --no-checkout --depth 1 --sparse $REPO .
+        git sparse-checkout init --cone
+        git sparse-checkout set ${{ inputs.patterns }}
+        git fetch --no-tags --prune --depth=1 origin $BRANCH
+        git checkout $BRANCH
