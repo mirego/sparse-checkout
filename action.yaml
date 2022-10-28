@@ -8,8 +8,7 @@ inputs:
     required: true
   branch:
     description: The branch to checkout.
-    default: ${GITHUB_REF/#refs\/heads\//}
-    required: true
+    required: false
 
 runs:
   using: "composite"
@@ -19,8 +18,10 @@ runs:
       run: |
         REPO="https://${GITHUB_ACTOR}:${{ github.token }}@github.com/${GITHUB_REPOSITORY}.git"
         BRANCH="${{ inputs.branch }}"
+        DEFAULT_BRANCH="${GITHUB_REF/#refs\/heads\//}"
+        REF="${BRANCH:-$DEFAULT_BRANCH}"
         git clone --filter=blob:none --no-checkout --depth 1 --sparse $REPO .
-        git sparse-checkout init --cone
+        git sparse-checkout init --cone --sparse-index
         git sparse-checkout set ${{ inputs.patterns }}
-        git fetch --no-tags --prune --depth=1 origin $BRANCH
-        git checkout $BRANCH
+        git fetch --progress --no-tags --prune --depth=1 origin $REF:$REF
+        git checkout --progress $REF
