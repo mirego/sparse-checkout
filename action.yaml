@@ -18,10 +18,14 @@ runs:
       run: |
         REPO="https://${GITHUB_ACTOR}:${{ github.token }}@github.com/${GITHUB_REPOSITORY}.git"
         BRANCH="${{ inputs.branch }}"
-        DEFAULT_BRANCH="${GITHUB_REF/#refs\/heads\//}"
-        REF="${BRANCH:-$DEFAULT_BRANCH}"
+        REF="${BRANCH}"
+        FULLREF="${BRANCH}:${BRANCH}"
+        if [ -z "${BRANCH}" ]; then
+          REF="${GITHUB_SHA}"
+          FULLREF="${GITHUB_SHA}"
+        fi
         git clone --filter=blob:none --no-checkout --depth 1 --sparse $REPO .
         git sparse-checkout init --cone --sparse-index
         git sparse-checkout set ${{ inputs.patterns }}
-        git fetch --progress --no-tags --prune --depth=1 --update-head-ok origin $REF:$REF
+        git fetch --progress --no-tags --prune --depth=1 --update-head-ok origin $FULLREF
         git checkout --progress $REF
