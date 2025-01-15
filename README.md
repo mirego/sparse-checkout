@@ -1,3 +1,6 @@
+> [!WARNING]
+> Sparse checkout is now supported in the main [checkout](https://github.com/actions/checkout) action. This repo should no longer be used.
+
 # Sparse Checkout
 
 A simple action to perform a sparse checkout of the repository. 
